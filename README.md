@@ -195,3 +195,7 @@ function Component() {
   return ....
 }
 ```
+
+There's a lot of similarities between `reducer` and `xstate` but there are some differences. Even xstate looks more verbose, in this example, we might see in the future, when we add more features, it will be easier to maintain and test. We can also generate a state chart from the machine.
+
+![xstate](./libs/machines/todos/src/lib/todos.machine.png)
