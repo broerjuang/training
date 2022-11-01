@@ -1,12 +1,18 @@
+import type { ChangeEvent } from 'react';
+
 export function Index() {
   return (
     <header className="header">
       <h1>todos</h1>
-      <input
-        className="new-todo"
-        placeholder="What needs to be done?"
-        autoFocus={true}
-      />
+      <form>
+        <input
+          className="new-todo"
+          placeholder="What needs to be done?"
+          autoFocus={true}
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {}}
+        />
+      </form>
 
       {/* <!-- This section should be hidden by default and shown when there are todos --> */}
       <section className="main">

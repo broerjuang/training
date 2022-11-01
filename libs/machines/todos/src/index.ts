@@ -1,1 +1,1 @@
-export * from './lib/machines-todos';
+export * from './lib/todos.machine';
