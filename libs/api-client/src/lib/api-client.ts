@@ -1,4 +1,4 @@
-type Todo = {
+export type Todo = {
   id: string;
   title: string;
   completed: boolean;
@@ -22,42 +22,52 @@ interface IAPIClient {
 }
 
 export class APIClient implements IAPIClient {
+  baseURL: string;
+  // Sometimes we want to set baseurl so we can use this class in different environments
+  // For example, we can use this class in our tests to mock the API
+  constructor(baseURL?: string) {
+    this.baseURL = baseURL || '';
+  }
+
+  private _request<Data>(url: string, options?: RequestInit): Response<Data> {
+    return fetch(this.baseURL + url, options).then((response) =>
+      response.json()
+    );
+  }
   async getTodos() {
-    const response = await fetch('/api/todos');
-    const data = (await response.json()) as Response<Array<Todo>>;
-    return data;
+    const response = await this._request<Array<Todo>>('/api/todos');
+    // const data = (await response.json()) as Response<Array<Todo>>;
+    return response;
   }
 
   async createTodo(title: string) {
-    const response = await fetch('/api/todos', {
+    const response = await this._request<Todo>('/api/todos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ title }),
     });
-    const data = (await response.json()) as Response<Todo>;
-    return data;
+    return response;
   }
 
   async updateTodo(id: string, title?: string, completed?: boolean) {
-    const response = await fetch(`/api/todos/${id}`, {
+    const response = await this._request<Todo>(`/api/todos/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ title, completed }),
     });
-    const data = (await response.json()) as Response<Todo>;
-    return data;
+
+    return response;
   }
 
   async deleteTodo(id: string) {
-    const response = await fetch(`/api/todos/${id}`, {
+    const response = await this._request<Todo>(`/api/todos/${id}`, {
       method: 'DELETE',
     });
-    const data = (await response.json()) as Response<Todo>;
-    return data;
+    return response;
   }
 }
 

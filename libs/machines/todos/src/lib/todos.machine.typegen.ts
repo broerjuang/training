@@ -27,13 +27,13 @@ export interface Typegen0 {
     delays: never;
   };
   eventsCausingActions: {
-    addTodo: 'ADD_TODO';
-    deleteTodo: 'DELETE_TODO';
+    'add todo': 'ADD_TODO';
+    'delete todo': 'DELETE_TODO';
     'increment retry': 'xstate.after(100)#todo.retrying';
     'reset-retry': 'done.invoke.todo.unknown:invocation[0]';
+    'set current todo': 'SET_CURRENT_TODO';
     'set todos from services': 'done.invoke.todo.unknown:invocation[0]';
-    setCurrentTodo: 'SET_CURRENT_TODO';
-    toggleTodo: 'TOGGLE_TODO';
+    'toggle todo': 'TOGGLE_TODO';
   };
   eventsCausingServices: {
     fetchTodos: 'xstate.after(100)#todo.retrying' | 'xstate.init';
@@ -42,6 +42,6 @@ export interface Typegen0 {
     'retry <== 3': 'xstate.after(100)#todo.retrying';
   };
   eventsCausingDelays: {};
-  matchesStates: 'errored' | 'idle' | 'retrying' | 'unknown';
+  matchesStates: 'errored' | 'loaded' | 'retrying' | 'unknown';
   tags: never;
 }

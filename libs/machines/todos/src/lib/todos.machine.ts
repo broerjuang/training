@@ -4,7 +4,7 @@ import { client } from '@training/api-client';
 
 type Todo = {
   id: string;
-  title: string;
+  text: string;
   completed: boolean;
 };
 
@@ -21,7 +21,7 @@ type Event =
   | { type: 'DELETE_TODO'; payload: string };
 
 export const todoMachine =
-  /** @xstate-layout N4IgpgJg5mDOIC5QBcD2FUDoCuA7A1rqgO64DEGuYmAlrgG6r7VoY4FGkJ2MDGAhshqpcAbQAMAXQmTEoAA6pYNISLkgAHogBMAVl2Zt44wEYAbNvMAWcSYAc2gDQgAnoiu7xmT1fvj9xgDM4gDsAL5hzqxYeIQk5GAATomoiZjyADaCAGapALaY0exxXDyoAqpiUjLqisqV6loIegZGphbWtg7ObghmViGYgSEAnHqBZiG6wYGBEVHoWDQQGWBkAMoAogAqAPoAwgCqAErHmwBye9sA8gAi1zVIIHUqwriNiGZmdkNGunY2Ww2EYhHqIYaBTChbQjOz9cQTELaOaREBFZarMgAQVut12N3ujwUSleaieTW+kJMJl8JhGsws4jsJjBCF0IS8JimI10YxsdMC2nmaMWtBWaxuAHFJQAZTb4u4PKS1EkNcnuZGYOyBXw6syBEyBOzG1kQqFInlmTwmcR-YXo8VkW6bOXbeUEpWyJ4vNWgJpWbSDUKC5HUm12aas9mc7keHm2PThVFFRJgZCJFx0KBkDSwZCCaj8bLIJIACht4gAlGQU2mM1mic9VW8PggALQ2TAByz6Fo2sYjVkhOyDEIhMO2-QhMwmIXJ0Wp9OZ3DZ3P5kuYIslxLl4zV2tLhsmL3E+ot9XtunebRWEa2ulWWYwlmuRB8zBInXRqZfSYRVFEBAcDqEUsScO83rNmSfoaqyAyQlYzLTIEd4Rg4SYLGwGJgCqZ7QZoiC6GYXj9NMsLiPCI6gq+CCISYH7aMyViTLoRghIKZj2gudbLlAuGkhBMFskiWrEQCiZGFYzFDl8XZcuxJisdONhWFxbBJCkqYQPxvoEWyViYCMNieBRimTOIt6sja2hmFCPIjvq47sroamoDp55CW2xpdtoPasfo-YwqyjEGeIRniQMVo3jy-5hEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBcD2FUDoCuA7A1rqgO64DEGuYmAlrgG6r7VoY4FGkJ2MDGAhshqpcAbQAMAXQmTEoAA6pYNISLkgAHogBMAVl2Zt44wEYAbNvMAWcSYAc2gDQgAnoiu7xmT1fvj9xgDM4gDsAL5hzqxYeIQk5GAATomoiZjyADaCAGapALaY0exxXDyoAqpiUjLqisqV6loIegZGphbWtg7ObghmViGYgSEAnHqBZiG6wYGBEVHoWBmo-BCQZADKAKIAKgD6AMIAqgBKJ1sAcvs7APIAIjc1SCB1KsK4jYghDt4jdnZmSYhWbaEY9RCzVraKwjXRjYJmQImOaREBFZardYAQTudz2tweTwUSjeameTTMdkCmBMJl8JhGsws4jsJnBCF0IS8JimsLGNgZgW08zRi0wGLWEDItwA4jKADJbfH3R5SWokhrk9zIzB2LniJGWFnaMx09mggwjFlWGyBf5w-wi9ErSVkO5bRU7JUE1WyZ6vTWgJpWbSDUJC7RI2ks6bsznc3keWG2PThVFFRJgZCJFx0KBkDSwZCCaj8bLIJIAChMxgAlGQM1mc3miS8Ne9PggALQ2TAhyz6Fo1sZg1xfPWYEIhWk1lohU3C9NizPZ3O4fOF4sVzBliuJat1hvLptrqCiEx+4n1Dta7sM7zQq2WEZWEEjNljhD8yeRjxcqaApMESokQazwM8RSxJwHz+u2ZJBu4TifgM1JWKy0yBFadi6A4aYLGwEqQOq17wZoiC6GYXj9NMfziP0LJTuyaEmD+rJWJMuhGMCJpOseq55sRpIwQhHIhNouqUXYIackYNpmOy85mH2PLAiYnHzjYVi8WwSQpJmECCYGZEclYmAvv4ximhRXIwuys5KeIsJ6oi06cro2moIZN4iV2-x9toA6cfow6guadFmTMNYWBRgQDIuERAA */
   createMachine(
     {
       context: { todos: [], currentTodo: '', retry: 0 } as Context,
@@ -43,7 +43,7 @@ export const todoMachine =
             src: 'fetchTodos',
             onDone: [
               {
-                target: 'idle',
+                target: 'loaded',
                 actions: ['set todos from services', 'reset-retry'],
               },
             ],
@@ -54,19 +54,22 @@ export const todoMachine =
             ],
           },
         },
-        idle: {
+        loaded: {
           on: {
             SET_CURRENT_TODO: {
-              actions: 'setCurrentTodo',
+              actions: 'set current todo',
             },
             ADD_TODO: {
-              actions: 'addTodo',
+              actions: 'add todo',
+              description: 'Post new todo',
             },
             TOGGLE_TODO: {
-              actions: 'toggleTodo',
+              actions: 'toggle todo',
+              description: 'Toggle between complete or not',
             },
             DELETE_TODO: {
-              actions: 'deleteTodo',
+              actions: 'delete todo',
+              description: 'Delete todo',
             },
           },
         },
@@ -95,17 +98,17 @@ export const todoMachine =
         'set todos from services': assign((_, event) => ({
           todos: event.data,
         })),
-        setCurrentTodo: assign({
+        'set current todo': assign({
           currentTodo: (_, event) => event.payload,
         }),
-        addTodo: assign({
+        'add todo': assign({
           todos: (context: Context, event) => [
             ...context.todos,
-            { id: uuid(), title: event.payload, completed: false },
+            { id: uuid(), text: event.payload, completed: false },
           ],
           currentTodo: '',
         }),
-        toggleTodo: assign({
+        'toggle todo': assign({
           todos: (context: Context, event) =>
             context.todos.map((todo) =>
               todo.id === event.payload
@@ -113,7 +116,7 @@ export const todoMachine =
                 : todo
             ),
         }),
-        deleteTodo: assign({
+        'delete todo': assign({
           todos: (context: Context, event) =>
             context.todos.filter((todo) => todo.id !== event.payload),
         }),
@@ -133,7 +136,10 @@ export const todoMachine =
           if (!response.success || !response.data) {
             throw new Error(response?.message || 'Unknown error');
           } else {
-            return response.data;
+            return response.data.map(({ title, ...todo }) => ({
+              ...todo,
+              text: title,
+            }));
           }
         },
       },
