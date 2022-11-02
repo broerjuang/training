@@ -1,10 +1,6 @@
-import { useMachine } from '@xstate/react';
-import { todoMachine } from '@training/machines/todos';
 import type { ChangeEvent } from 'react';
 
 export function Index() {
-  const [state] = useMachine(todoMachine);
-  console.log({ state });
   return (
     <header className="header">
       <h1>todos</h1>
