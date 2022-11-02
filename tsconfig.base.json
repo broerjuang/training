@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@training/api-client": ["libs/api-client/src/index.ts"],
       "@training/machines/todos": ["libs/machines/todos/src/index.ts"]
     }
   },
