@@ -19,16 +19,16 @@ type Event =
   | { type: 'DELETE_TODO'; payload: string };
 
 export const todoMachine =
-  /** @xstate-layout N4IgpgJg5mDOIC5QBcD2FUDoCWEA2YAxAMoCiAKgPoDCAqgEr2kByV5A8gCLsDaADAF1EoAA6pY2ZNlQA7YSAAeiALQAmAIyYArHwBsqgCx8AHAYMB2Vbq36ANCACeiAMzmtmAJzPVx1R75aBlpaHgC+ofZoGDj4RACCnJyUHNz8QkggYhJSsvJKCOoG2r7GWuYmQSbmBrr2Tgiq5ZjOfK3qZa42Bs7hkehYuASEHADiIwAypMlcvILyWZLSchn5ynye6sZuZqp8frrmziF1iOq6us3mxurOHh67Nh66vSBRA7GEnKST5FMps+lROJFrkVohVM1dq5jM5jP5YapVMETghYZhdN1qsZTBZSjDwhEQDJ0HB5G8YgR5sCcstQKszu49sY+F4YaVgm4UcoDBDDj4dHpWsZdHCXm8qdklnkVBpnJgmSzYbDgmUtFybppzOoWSKPDYyuorATQkA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBcD2FUDo0dgYgGUBRAFQH0BhAVQCUaiA5ckgeQBEWBtABgF1FQAB1SwAlslGoAdgJAAPRAFoATAEZMAVm4A2ZQBZuADj16A7Mu0bdAGhABPRAGZTGzAE5Hyw8rfcNejQ03AF9g2xwsCPwAQTY2MlYOHn4kEGExCWlZBQRVPU1vQw1TIwCjUz1tWwcEZRLMR24m1WLnKz1HUPD0SJ78VgBxAYAZIgT2Lj5ZdPFJGVScxW53VUMXE2VuH21TRyDqxFVtbQbTQ1VHNzdNqzdtLpAI7D68NiJRkjHEyZShEVmsgtEMoGptnIZHIZfJDlMpAgcEJDMNoOhVDMYzEUIQ8ngBXKQAaykqAA7lI8BgpGBMKIpAA3VAE6l4wnEskIWkMgDGAENMlJkslpv9+dklI5dJgtkZdBooY49EUNAiVHtMPptI5HKpdnDirCcT1MPiiaTyWAAE4W1AWzCCAA2fIAZjaALbPDDG1lmjn01C8-mCqapGaioEIRTmTCmFEuVaqNzFRWqFWNZYdbw+RN+Cp6Q2ek1s8mU6mcxnMo2Fn1lgNzQWqX5pEVzMURvZuTSKtTcFweVT9xwqo75Nw67hmVRbYyJ5T5rBgV2CZB2AAEUTwAEkpIJccgV1zcVawFI9xEhSHm4DQDkLB3vBpLjoAprtCn7EpVBZ3KYjj+dDKdlUOdMAXJdV3XHkIAgNcenPP4MhbcNnBOIotllUw3ACDEVTqdQLA0ft2gqOFMOA+1UEg2koBXWBcQAI1dcQYIwClpFLP0mQ9LByMoqRqNohimIiX1uT5Os+DgpsEKveQP3yTx0VhPRJ0hPJlBVMxlkw2MrmOKELjIiiIComj6MY08ejwS1rVtB1nTdLjMB44y+NMwSLIwET-TE6Qg0bUNEOvYEJQae9E37HwLEsVNLlOC49M1NxvE6B5iQgOBZCeKJhWk+YgojOFDE0HVNU2QD0UHd8I37dQWihHtPD2YwdGAqsyRygE8tkgqrmjTZ5SMfQmnHVMzgaVTpVhBVuA8YDrJtSAOrDfK8lcMwNWKbRfHOQxUyaKU9nMGMoU1LQNDmxdl2YkQlsC7rFHULY7lWLxjB8cd0SHa5MEnZTx0VP8tjzMJHiNZyTIE8zrtumScj0L8+w0NQTpjT89A0ioft8Y7nzhFx7hBiIYa6xY-qlfrZXlRV4SqxQrEcLGe20Ywii2wwCdCIA */
   createMachine(
     {
       context: { todos: [], currentTodo: '' } as Context,
       tsTypes: {} as import('./todos.machine.typegen').Typegen0,
       schema: { context: {} as Context, events: {} as Event },
       id: 'todo',
-      initial: 'idle',
+      initial: 'unknown',
       states: {
-        idle: {
+        todos: {
           on: {
             SET_CURRENT_TODO: {
               actions: 'setCurrentTodo',
@@ -42,6 +42,52 @@ export const todoMachine =
             DELETE_TODO: {
               actions: 'deleteTodo',
             },
+          },
+        },
+        unknown: {
+          invoke: {
+            src: 'fetch todos',
+            onDone: [
+              {
+                target: 'empty todos',
+                cond: 'has no todo items',
+              },
+              {
+                target: 'todos',
+              },
+            ],
+            onError: [
+              {
+                target: 'errored',
+              },
+            ],
+          },
+        },
+        errored: {},
+        'empty todos': {
+          on: {
+            'Input current todo': {
+              actions: 'set current todo',
+            },
+            'add todo': {
+              target: 'loading submit todo',
+              cond: 'has current todo',
+            },
+          },
+        },
+        'loading submit todo': {
+          invoke: {
+            src: 'add todo to api',
+            onDone: [
+              {
+                target: 'unknown',
+              },
+            ],
+            onError: [
+              {
+                target: 'errored',
+              },
+            ],
           },
         },
       },
